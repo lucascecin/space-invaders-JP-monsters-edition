@@ -29,7 +29,7 @@ class Projectile {
 function createProjectile(){ // called when spacebar is pressed 
     let projectile = new Projectile(player.x + player.width/2, player.y);
     projectilesArray.push(projectile)
-    //console.log('PROJECTILE CREATED')
+    laserSound.play()
     console.log(projectilesArray)
 }
 

@@ -1,5 +1,9 @@
 const playerImage = new Image();
-playerImage.src = 'img/nave.png'
+playerImage.src = 'img/nave.png';
+
+laserSound = new Audio();
+laserSound.src = 'audio/laser1.wav'
+laserSound.volume = 0.2;
 
 class Player {
     constructor(x, y) {

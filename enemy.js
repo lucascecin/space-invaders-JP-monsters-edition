@@ -1,15 +1,18 @@
 const bocaPreta = new Image();
-bocaPreta.src = 'img/bocapreta.png'
+bocaPreta.src = 'img/bocapreta.png';
 const coronga = new Image();
-coronga.src = 'img/coronga.png'
+coronga.src = 'img/coronga.png';
 const monstrito = new Image();
-monstrito.src = 'img/monstrito.png'
+monstrito.src = 'img/monstrito.png';
 const fantasmaNoturno = new Image();
-fantasmaNoturno.src = 'img/fantasmaNoturno.png'
+fantasmaNoturno.src = 'img/fantasmaNoturno.png';
 const polvoEspinho = new Image();
-polvoEspinho.src = 'img/polvoespinho.png'
+polvoEspinho.src = 'img/polvoespinho.png';
 const olhosDaNoite = new Image();
-olhosDaNoite.src = 'img/olhosdanoite.png'
+olhosDaNoite.src = 'img/olhosdanoite.png';
+const gameOverDrawing = new Image();
+gameOverDrawing.src = 'img/gameover.png';
+
 
 enemySprites = [monstrito, coronga, bocaPreta, fantasmaNoturno, polvoEspinho, 
                 olhosDaNoite];
@@ -100,7 +103,7 @@ function destroyEnemiesOutOfScreen(){
         if (enemy.isOutofScreen) {
             enemiesArray.splice(i, 1)
             i--
-            console.log('ENEMY REMOVED!')
+            //console.log('ENEMY REMOVED!')
         }
     }
 } 
@@ -111,7 +114,7 @@ function handleEnemies(){
         enemiesArray[i].update()
         enemiesArray[i].draw()
         
-        //collision check: monster x player
+        //collision check: monster x player (game over!)
         if (collision(player, enemiesArray[i])) {
             console.log("Collision PLAYER X ENEMY!")
             const explosionX = player.x + player.width / 2
@@ -128,13 +131,14 @@ function handleEnemies(){
                 'white'                    //color
                 )) 
             }
-            player.opacity = 0
-            game.over = true
-            setTimeout(() => {game.active = false}, 2000)
-
-
+        
+        //hide player, cancel player commands and wait 2 seconds to pause animation
+        player.opacity = 0
+        game.over = true
+        setTimeout(() => {game.active = false}, 2000)
         }
     }
     checkIfProjectileHitMonster() // also generates explosion particles
     destroyEnemiesOutOfScreen()
 }
+

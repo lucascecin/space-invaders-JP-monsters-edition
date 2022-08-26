@@ -1,9 +1,3 @@
-//To improve
-//Sound: when shooting
-//Score
-//Game Over
-//Limit max bullets on screen to 3 or 4
-
 //setup and loop file
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');
@@ -20,7 +14,7 @@ var quitGame = false
 
 //game speed
 function handleGameStatus() {
-    if (frame % 1500 === 0) {
+    if (frame % 2000 === 0) {
     gameSpeed += 0.05
     console.log('Game Speed set to ' + gameSpeed)
     }
@@ -30,7 +24,6 @@ let game = {
     over: false,
     active: true,
 }
-
 
 // keys
 const LEFT = 37, RIGHT = 39, SPACE = 32, Q = 81;
@@ -78,6 +71,10 @@ function keyupHandler(e) {
     }
 }
 
+function drawGameOverMessage() {
+    ctx.drawImage(gameOverDrawing, 70, 200, gameOverDrawing.width, gameOverDrawing.height)
+}
+
 function animate() {
     if (!game.active) return
     frame++
@@ -90,6 +87,8 @@ function animate() {
     handleProjectiles()
     handleParticles()
     handleGameStatus()
+    if (game.over) {drawGameOverMessage()}
+    //if (game.over) {setTimeout(drawGameOverMessage, 200)} // timeout not working
     if (quitGame) {return} //if "Q" is pressed
     if (!gameOver) requestAnimationFrame(animate);
 }
