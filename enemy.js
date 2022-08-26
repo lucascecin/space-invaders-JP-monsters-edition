@@ -12,7 +12,9 @@ const olhosDaNoite = new Image();
 olhosDaNoite.src = 'img/olhosdanoite.png';
 const gameOverDrawing = new Image();
 gameOverDrawing.src = 'img/gameover.png';
-
+const enemyExplosionAudio = new Audio();
+enemyExplosionAudio.src = 'audio/explosion3.wav';
+enemyExplosionAudio.volume = 0.5;
 
 enemySprites = [monstrito, coronga, bocaPreta, fantasmaNoturno, polvoEspinho, 
                 olhosDaNoite];
@@ -80,6 +82,8 @@ function checkIfProjectileHitMonster(){
                
                score += 100
                scoreElement.innerHTML = score
+
+                enemyExplosionAudio.play()
 
                //Enemy explosion
                for (i = 0; i < 30; i++) { 
