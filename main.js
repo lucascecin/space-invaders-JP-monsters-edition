@@ -7,6 +7,12 @@
 //setup and loop file
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');
+let scoreElement = document.querySelector('#scoreElement');
+let score = 0
+
+canvas.width = 1024
+canvas.height = 576
+
 var frame = 0;
 var gameSpeed = 1;
 var gameOver = false;
@@ -20,6 +26,11 @@ function handleGameStatus() {
     }
 }
 
+let game = {
+    over: false,
+    active: true,
+}
+
 
 // keys
 const LEFT = 37, RIGHT = 39, SPACE = 32, Q = 81;
@@ -29,6 +40,8 @@ window.addEventListener("keyup",keyupHandler,false);
 
 function keydownHandler(e) {
     //console.log(e)
+    if (game.over) return
+  
     switch(e.keyCode){
         case RIGHT:
             player.mvRight = true;
@@ -50,6 +63,7 @@ function keydownHandler(e) {
 }
 
 function keyupHandler(e) {
+    
     switch(e.keyCode){
         case RIGHT:
             player.mvRight = false;
@@ -65,6 +79,7 @@ function keyupHandler(e) {
 }
 
 function animate() {
+    if (!game.active) return
     frame++
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.fillStyle = 'black';
@@ -73,6 +88,7 @@ function animate() {
     handlePlayer()
     handleEnemies()
     handleProjectiles()
+    handleParticles()
     handleGameStatus()
     if (quitGame) {return} //if "Q" is pressed
     if (!gameOver) requestAnimationFrame(animate);

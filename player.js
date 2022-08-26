@@ -15,6 +15,7 @@ class Player {
         this.mvLeft = false;
         this.firing = false;
         this.canFireAgain = true; // to avoid turbo fire
+        this.opacity = 1;
     }
     update(){
         if (this.mvRight) {
@@ -33,7 +34,10 @@ class Player {
     draw(){
         //ctx.fillStyle = 'blue'
         //ctx.fillRect(this.x, this.y, this.width, this.height)
+        ctx.save();
+        ctx.globalAlpha = this.opacity;
         ctx.drawImage(playerImage, this.x, this.y, this.width, this.height)
+        ctx.restore();
     }
     // se já deu 1 tiro e ainda não levantou space, canFireAgain = false
     shoot(){ 

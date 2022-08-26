@@ -45,12 +45,12 @@ function createEnemy(){
     let randomSelectedEnemy = enemySprites[Math.floor(Math.random() * enemySprites.length)]
     let enemy = new Enemy(randomSelectedEnemy);
     enemiesArray.push(enemy);
-    console.log("New enemy created!")
+    //console.log("New enemy created!")
 }
 
 //at every given interval
 function spawnEnemy(){
-    if (frame % 300 === 0) {
+    if (frame % 350 === 0) {
         createEnemy();
     }
 } 
@@ -67,22 +67,28 @@ function checkIfProjectileHitMonster(){
     for (i in projectilesArray){
         for (j in enemiesArray) {
             if (collision(projectilesArray[i], enemiesArray[j])) {
-                console.log("PROJECTILE HITS ENEMY!")
-               // console.log(projectilesArray.indexOf(projectilesArray[i]))
+               //console.log("PROJECTILE HITS ENEMY!")
+               const explosionX = enemiesArray[j].x + enemiesArray[j].width / 2;
+               const explosionY = enemiesArray[j].y + enemiesArray[j].height / 2
                projectilesArray.splice(i, 1)
                i--
                enemiesArray.splice(j, 1) 
                j--
-               // call enemy explosion function
-               // particles.push(new Particle(
-               // enemiesArray[i].x + enemiesArray[i].width / 2,
-               // enemiesArray[i].y + enemiesArray[i].heigth / 2,
-               // 2
-               // 2
-               // enemiesArray[i].radius,
-               // ))
                
+               score += 100
+               scoreElement.innerHTML = score
 
+               //Enemy explosion
+               for (i = 0; i < 30; i++) { 
+                    particlesArray.push(new Particle( 
+                    explosionX,                 // x
+                    explosionY,                 // y
+                    (Math.random() - 0.5) * 2,  // dx
+                    (Math.random() - 0.5) * 2,  // dy
+                    Math.random() * 5,          //radius
+                    'yellow'                    //color
+                    ))                                                 
+               }
             }     
         }
     } 
@@ -102,18 +108,33 @@ function destroyEnemiesOutOfScreen(){
 function handleEnemies(){
     spawnEnemy();
     for (i in enemiesArray){
-        enemiesArray[i].update();
-        enemiesArray[i].draw();
-        
-        //if enemy pass botom of screen
-        
+        enemiesArray[i].update()
+        enemiesArray[i].draw()
         
         //collision check: monster x player
         if (collision(player, enemiesArray[i])) {
             console.log("Collision PLAYER X ENEMY!")
-            // GAME OVER
+            const explosionX = player.x + player.width / 2
+            const explosionY = player.y + player.height / 2
+            enemiesArray.splice(i, 1);
+            //Player explosion
+            for (i = 0; i < 50; i++) { 
+                particlesArray.push(new Particle( 
+                explosionX,                 // x
+                explosionY,                 // y
+                (Math.random() - 0.5) * 2,  // dx
+                (Math.random() - 0.5) * 2,  // dy
+                Math.random() * 7,          //radius
+                'white'                    //color
+                )) 
+            }
+            player.opacity = 0
+            game.over = true
+            setTimeout(() => {game.active = false}, 2000)
+
+
         }
     }
-    checkIfProjectileHitMonster()
+    checkIfProjectileHitMonster() // also generates explosion particles
     destroyEnemiesOutOfScreen()
 }

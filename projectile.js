@@ -27,10 +27,9 @@ class Projectile {
 }
 
 function createProjectile(){ // called when spacebar is pressed 
-    // não está lendo a posição do player
     let projectile = new Projectile(player.x + player.width/2, player.y);
     projectilesArray.push(projectile)
-    console.log('PROJECTILE CREATED')
+    //console.log('PROJECTILE CREATED')
     console.log(projectilesArray)
 }
 
@@ -38,10 +37,9 @@ function destroyProjectilesOutOfScreen(){
     for (i in projectilesArray) {
         let projectile = projectilesArray[i];
         if (projectile.isOutofScreen) {
-            //projectilesArray.shift() 
             projectilesArray.splice(i, 1)
             i--
-            console.log('PROJECTILE REMOVED!')
+            //console.log('PROJECTILE REMOVED!')
         }
     }
 } 
