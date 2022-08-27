@@ -1,3 +1,4 @@
+//images
 const bocaPreta = new Image();
 bocaPreta.src = 'img/bocapreta.png';
 const coronga = new Image();
@@ -12,12 +13,21 @@ const olhosDaNoite = new Image();
 olhosDaNoite.src = 'img/olhosdanoite.png';
 const gameOverDrawing = new Image();
 gameOverDrawing.src = 'img/gameover.png';
+const miladudi = new Image();
+miladudi.src = 'img/miladudi.png';
+const sapao = new Image();
+sapao.src = 'img/sapao2.png';
+
+//audio 
 const enemyExplosionAudio = new Audio();
 enemyExplosionAudio.src = 'audio/explosion3.wav';
 enemyExplosionAudio.volume = 0.5;
+const playerExplosionAudio = new Audio();
+playerExplosionAudio.src = 'audio/playerexplosion.wav';
+playerExplosionAudio.volume = 0.5;
 
 enemySprites = [monstrito, coronga, bocaPreta, fantasmaNoturno, polvoEspinho, 
-                olhosDaNoite];
+                olhosDaNoite, miladudi, sapao];
 enemiesArray = [];
 
 class Enemy {
@@ -124,7 +134,7 @@ function handleEnemies(){
             const explosionX = player.x + player.width / 2
             const explosionY = player.y + player.height / 2
             enemiesArray.splice(i, 1);
-            //Player explosion
+            //Player explosion particles
             for (i = 0; i < 50; i++) { 
                 particlesArray.push(new Particle( 
                 explosionX,                 // x
@@ -138,6 +148,7 @@ function handleEnemies(){
         
         //hide player, cancel player commands and wait 2 seconds to pause animation
         player.opacity = 0
+        playerExplosionAudio.play()
         game.over = true
         setTimeout(() => {game.active = false}, 2000)
         }
