@@ -41,6 +41,3 @@ function handleParticles() {
         particlesArray[i].update();    
     }
 }
-
-// Chris Couses
-// Usa particles.foreach(particle => {particle.update()})

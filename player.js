@@ -57,6 +57,5 @@ let player = new Player (canvas.width/2 - 25  , 500)
 function handlePlayer() {
     player.update();
     player.draw();
-    
 }
 

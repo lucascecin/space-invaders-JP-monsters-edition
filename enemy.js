@@ -45,6 +45,7 @@ class Enemy {
     update() {
         this.y += this.dy * gameSpeed
         if (this.y > canvas.height) this.isOutofScreen = true;
+
     }
     
     draw(){
@@ -84,17 +85,14 @@ function checkIfProjectileHitMonster(){
             if (collision(projectilesArray[i], enemiesArray[j])) {
                //console.log("PROJECTILE HITS ENEMY!")
                const explosionX = enemiesArray[j].x + enemiesArray[j].width / 2;
-               const explosionY = enemiesArray[j].y + enemiesArray[j].height / 2
-               projectilesArray.splice(i, 1)
-               i--
-               enemiesArray.splice(j, 1) 
-               j--
-               
-               score += 100
-               scoreElement.innerHTML = score
-
-                enemyExplosionAudio.play()
-
+               const explosionY = enemiesArray[j].y + enemiesArray[j].height / 2;
+               projectilesArray.splice(i, 1);
+               i--;
+               enemiesArray.splice(j, 1); 
+               j--;
+               score += 100; // scores 100 points per hit
+               scoreElement.innerHTML = score;   // writes score
+               enemyExplosionAudio.play();
                //Enemy explosion
                for (i = 0; i < 30; i++) { 
                     particlesArray.push(new Particle( 
