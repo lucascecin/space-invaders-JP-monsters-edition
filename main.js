@@ -1,9 +1,8 @@
 // To do´s
 // when game over, space bar restars the game (insert message)
 // enemy shoots (at random intervals)
-// change enemy movement: like space invaders
-
-
+// change enemy movement: like original space invaders
+// enemies spawns in grids
 
 //setup and loop file
 const canvas = document.getElementById("canvas");
@@ -16,12 +15,11 @@ canvas.height = 576
 
 var frame = 0;
 var gameSpeed = 1;
-//var gameOver = false;
 var quitGame = false
 
 //game speed
 function handleGameStatus() {
-    if (frame % 2000 === 0) {
+    if (frame % 2000 === 0) { // 2000 / 60 = every 33 seconds
     gameSpeed += 0.05
     console.log('Game Speed set to ' + gameSpeed)
     }
@@ -85,12 +83,13 @@ function keyupHandler(e) {
 
 
 function drawGameOverMessage() {
-    ctx.drawImage(gameOverDrawing, 70, 160, gameOverDrawing.width, gameOverDrawing.height)
+    ctx.drawImage(gameOverDrawing, 70, 140, gameOverDrawing.width, gameOverDrawing.height)
 }
 
 function drawPressSpaceBarMessage() {
-    // Aperte a barra de espaço para recomeçar
-    // Posição: Logo abaixo do game over
+    ctx.font = '40px Georgia';
+    ctx.fillStyle = 'white'
+    ctx.fillText('Aperte a barra de espaço para recomeçar', 120, 430)
 }
 
 function restartGame() {
@@ -117,7 +116,6 @@ function animate() {
         return
     }
     frame++
-    console.log(frame)
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.fillStyle = 'black';
     ctx.fillRect(0,0,canvas.width,canvas.height);
