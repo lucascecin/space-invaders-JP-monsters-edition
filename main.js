@@ -145,7 +145,7 @@ function animate(timeStamp) {
     handleGameStatus()
     drawTempoDeJogo()
     drawFpsDisplay()
-    handleLayer2()
+    //handleLayer2()
     if (game.over) {drawGameOverMessage()}
     //if (game.over) {setTimeout(drawGameOverMessage, 200)} // timeout not working
     if (quitGame) {return} //if "Q" is pressed
