@@ -1,8 +1,13 @@
 // To do´s
-// when game over, space bar restars the game (insert message)
 // enemy shoots (at random intervals)
-// change enemy movement: like original space invaders
+// change enemy movement: like original space invaders and others
 // enemies spawns in grids
+// maniputale delta time and fps
+// pause game
+// enemy HP
+// boss 1
+// Stage 2
+
 
 //setup and loop file
 const canvas = document.getElementById("canvas");
@@ -40,7 +45,6 @@ window.addEventListener("keyup",keyupHandler,false);
 function keydownHandler(e) {
     //console.log(e)
     //if (game.over) return
-  
     switch(e.keyCode){
         case RIGHT:
             player.mvRight = true;
@@ -64,7 +68,6 @@ function keydownHandler(e) {
 }
 
 function keyupHandler(e) {
-    
     switch(e.keyCode){
         case RIGHT:
             player.mvRight = false;
@@ -79,8 +82,6 @@ function keyupHandler(e) {
             break;
     }
 }
-
-
 
 function drawGameOverMessage() {
     ctx.drawImage(gameOverDrawing, 70, 140, gameOverDrawing.width, gameOverDrawing.height)
@@ -110,25 +111,44 @@ function restartGame() {
     }
 }
 
-function animate() {
+function drawTempoDeJogo() {
+    // assuming broser runs at 60 fps
+    let tempoDeJogo = document.getElementById('tempoDeJogo')
+    tempoDeJogo.innerHTML = 'Tempo de jogo: ' + Math.floor(frame/60) + ' segundos'
+}
+function drawFpsDisplay() {
+    let fpsDisplay = document.getElementById('fpsDisplay')
+    fpsDisplay.innerHTML = Math.floor(frame/(timeAcumInMiliseconds/1000)) + ' fps'
+}
+
+let lastTime = 1
+let timeAcumInMiliseconds = 0
+
+
+function animate(timeStamp) {
     if (!game.active) {
         drawPressSpaceBarMessage()
         return
     }
     frame++
+    const deltaTime = timeStamp - lastTime
+    lastTime = timeStamp
+    timeAcumInMiliseconds += deltaTime
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.fillStyle = 'black';
     ctx.fillRect(0,0,canvas.width,canvas.height);
     handleStars()
     handlePlayer()
-    handleEnemies()
     handleProjectiles()
+    handleEnemies()
     handleParticles()
     handleGameStatus()
+    drawTempoDeJogo()
+    drawFpsDisplay()
+    handleLayer2()
     if (game.over) {drawGameOverMessage()}
     //if (game.over) {setTimeout(drawGameOverMessage, 200)} // timeout not working
     if (quitGame) {return} //if "Q" is pressed
     if (game.active) requestAnimationFrame(animate);
 }
-animate();
-
+animate(0);
