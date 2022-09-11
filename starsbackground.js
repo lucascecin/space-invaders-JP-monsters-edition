@@ -8,8 +8,8 @@ class Star {
         this.x = x;
         this.y = y;
         this.dx = 0;
-        this.dy = 0.4;
-        this.radius = Math.random() * 1;
+        this.dy = 2;
+        this.radius = Math.random() * 1.2;
     }
     update(){
         this.x += 0;

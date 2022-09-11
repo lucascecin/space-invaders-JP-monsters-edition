@@ -23,13 +23,13 @@ class Player {
     }
     update(){
         if (this.mvRight) {
-            this.x += 3;
+            this.x += 8;
             if (this.x + this.width > canvas.width) {
                 this.x = canvas.width - this.width
             }
         }
         if (this.mvLeft) {
-            this.x -= 3;
+            this.x -= 8;
             if (this.x < 0) {
                 this.x = 0
             }
@@ -52,7 +52,8 @@ class Player {
     }
 }
 
-let player = new Player (canvas.width/2 - 25, 500)
+//let player = new Player (canvas.width/2 - 25, 500)
+let player = new Player (490, 500)
 
 function handlePlayer() {
     player.update();

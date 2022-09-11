@@ -29,11 +29,25 @@ class Particle {
     }
 } 
 
+// function handleParticles() {
+//     for (i in particlesArray) {
+//         if (particlesArray[i].opacity <= 0.05) {
+//             particlesArray.splice(i, 1)
+//             i--
+//         }
+//     }
+//     for (i in particlesArray) {
+//         particlesArray[i].draw();
+//         particlesArray[i].update();    
+//     }
+// }
+
+// // tentar rodar de trás para frente!
 function handleParticles() {
-    for (i in particlesArray) {
-        if (particlesArray[i].opacity <= 0.05) {
+    for (i = particlesArray.length - 1; i >= 0; i--) {
+        if (particlesArray[i].opacity <= 0) {
             particlesArray.splice(i, 1)
-            i--
+            
         }
     }
     for (i in particlesArray) {
