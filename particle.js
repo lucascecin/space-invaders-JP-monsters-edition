@@ -25,33 +25,23 @@ class Particle {
     update() {
         this.x += this.dx;
         this.y += this.dy;
-        this.opacity -= 0.01
+        this.opacity -= 0.017
     }
 } 
 
-// function handleParticles() {
-//     for (i in particlesArray) {
-//         if (particlesArray[i].opacity <= 0.05) {
-//             particlesArray.splice(i, 1)
-//             i--
-//         }
-//     }
-//     for (i in particlesArray) {
-//         particlesArray[i].draw();
-//         particlesArray[i].update();    
-//     }
-// }
-
-// // tentar rodar de trás para frente!
-function handleParticles() {
+function updateParticles() {
+    for (i in particlesArray) {
+        particlesArray[i].update();
+    }
     for (i = particlesArray.length - 1; i >= 0; i--) {
         if (particlesArray[i].opacity <= 0) {
             particlesArray.splice(i, 1)
-            
         }
     }
+}
+
+function drawParticles() {
     for (i in particlesArray) {
         particlesArray[i].draw();
-        particlesArray[i].update();    
     }
 }

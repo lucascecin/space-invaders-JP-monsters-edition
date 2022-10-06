@@ -4,7 +4,7 @@ class Projectile {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.dy = 16 
+        this.dy = 0.35 
         this.radius = 5;
         this.width = 5;
         this.height = 5;        
@@ -12,8 +12,8 @@ class Projectile {
         this.isOutofScreen = false;
     } 
     update(){ 
-        this.y -= this.dy
-        if (this.y < -this.height) this.isOutofScreen = true;
+        this.y -= this.dy * step
+        if (this.y < -this.height + 30) this.isOutofScreen = true;
     }
 
     draw(){
@@ -26,11 +26,22 @@ class Projectile {
     }
 }
 
+///////////////////////////
+/// Player Projectiles ///
+/////////////////////////
+
 function createProjectile(){ // called when spacebar is pressed 
     let projectile = new Projectile(player.x + player.width/2, player.y);
     projectilesArray.push(projectile)
     laserSound.play()
     //console.log(projectilesArray)
+}
+
+function updatePlayerProjectiles(){
+    for (i in projectilesArray) { 
+        projectilesArray[i].update()
+        destroyProjectilesOutOfScreen() 
+    }
 }
 
 function destroyProjectilesOutOfScreen(){
@@ -39,10 +50,15 @@ function destroyProjectilesOutOfScreen(){
         if (projectile.isOutofScreen) {
             projectilesArray.splice(i, 1)
             i--
-            //console.log('PROJECTILE REMOVED!')
         }
     }
 } 
+
+function drawPlayerProjectiles(){
+    for (i in projectilesArray) { 
+        projectilesArray[i].draw()
+    }
+}
 
 ////////////////////////
 // Enemy Projectiles //
@@ -54,16 +70,15 @@ class EnemyProjectile {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.dy = 8 
-        this.radius = 10;
+        this.dy = 0.3 
+        this.radius = 5;
         this.width = 10;
         this.height = 10;        
         this.color = 'green'
         this.isOutofScreen = false;
-        
     } 
     update(){ 
-        this.y += this.dy
+        this.y += this.dy * step
         if (this.y > canvas.height) this.isOutofScreen = true;
     }
 
@@ -77,55 +92,66 @@ class EnemyProjectile {
     }
 }
 
-let projectileInterval = 300 
-function createEnemyProjectile(){ 
-    if (frame % projectileInterval === 0 && enemiesArray.length > 0) {
-        let randomSelectedEnemy = enemiesArray[Math.floor(Math.random() * enemiesArray.length)]
-        let enemyProjectile = new EnemyProjectile(
-            randomSelectedEnemy.x + randomSelectedEnemy.width/2, // x do inimigo
-            randomSelectedEnemy.y + randomSelectedEnemy.width)   // y do inimigo
-        enemyProjectiles.push(enemyProjectile)
-        projectileInterval = Math.floor((Math.random() * 75) + 150) // set new interval
-        console.log('enemy projectile created!')
-        console.log(projectileInterval)
-        // play another sound
-        return
+function destroyEnemyProjectilesOutOfScreen() {
+    for (i in enemyProjectiles) {
+        if (enemyProjectiles[i].isOutofScreen == true) {
+            enemyProjectiles.splice(i, 1);
+            i--;
+        }
     }
 }
 
-// function handleEnemyProjectiles(){
-//     for (i in enemyProjectiles) {
-//         enemyProjectiles[i].update()
-//         enemyProjectiles[i].draw()
-//         destroyEnemyProjectilesOutOfScreen()
-//     }
-// }
-
-function destroyEnemyProjectilesOutOfScreen() {
-    for (i in enemyProjectiles) {
-        let enemyProjectile = enemyProjectiles[i];
-        if (enemyProjectile.isOutofScreen) {
-            enemyProjectiles.splice(i, 1)
-            i--
-            console.log('ENEMY PROJECTILE REMOVED!')
-        }
-    }
-} 
-
-
-
-/////////////////////////////////////////////
-// function that wraps all class functions //
-////////////////////////////////////////////
-function handleProjectiles(){
-    for (i in projectilesArray) { 
-        projectilesArray[i].update()
-        projectilesArray[i].draw()
-        destroyProjectilesOutOfScreen() 
-    }
+function updateEnemyProjectiles(){
     for (i in enemyProjectiles){
         enemyProjectiles[i].update()
+    }
+}
+
+function checkIfEnemyProjectileHitPlayer () { 
+    for (i in enemyProjectiles) {
+        if (collision(enemyProjectiles[i], player)) {
+            player.hp -= 1;
+            if (player.hp > 0) {
+                enemyProjectiles.splice(i, 1);
+                i--;
+                // som de hit no player
+                // draw some particles on collision spot
+                enemyExplosionAudio.play()
+            } else if (player.hp == 0 && game.over == false) {
+                enemyProjectiles.splice(i, 1);
+                // TURN THIS SPEGUETTI CODE TO NEW FUNCTION
+                const explosionX = player.x + player.width / 2
+                const explosionY = player.y + player.height / 2
+                for (i = 0; i < 50; i++) {
+                particlesArray.push(new Particle(
+                    explosionX,                 // x
+                    explosionY,                 // y
+                    (Math.random() - 0.5) * 2,  // dx
+                    (Math.random() - 0.5) * 2,  // dy
+                    Math.random() * 7,          //radius
+                    'white'                     //color
+                ))
+                }
+                //hide player, cancel player commands and wait 2 seconds to pause animation
+                player.opacity = 0
+                playerExplosionAudio.play()
+                game.over = true
+                setTimeout(() => { game.active = false }, 2000)
+            }
+        }
+    }
+}
+
+// wraper for enemy projectile logics
+function handleEnemyProjectiles() {
+    updateEnemyProjectiles();
+    checkIfEnemyProjectileHitPlayer();
+    destroyEnemyProjectilesOutOfScreen();
+}
+
+
+function drawEnemyProjectiles(){
+    for (i in enemyProjectiles){
         enemyProjectiles[i].draw()
-        destroyEnemyProjectilesOutOfScreen()
     }
 }

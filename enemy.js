@@ -1,91 +1,99 @@
 //monsters
 
-const bocaPreta = new Image()                       //#1
-bocaPreta.src = 'img/bocapreta.png' 
-const coronga = new Image()                         //#2
-coronga.src = 'img/coronga.png'
-const monstrito = new Image()                       //#3
-monstrito.src = 'img/monstrito.png'
-const fantasmaNoturno = new Image()                 //#4
+const bocaPreta = new Image();                     //#1
+bocaPreta.src = 'img/bocapreta.png'; 
+const coronga = new Image();                       //#2
+coronga.src = 'img/coronga.png';
+const monstrito = new Image();                     //#3
+monstrito.src = 'img/monstrito.png';
+const fantasmaNoturno = new Image();               //#4
 fantasmaNoturno.src = 'img/fantasmaNoturno.png';
-const polvoEspinho = new Image()                    //#5
-polvoEspinho.src = 'img/polvoespinho.png'
-const olhosDaNoite = new Image()                    //#6
-olhosDaNoite.src = 'img/olhosdanoite.png'
-const miladudi = new Image()                        //#7
-miladudi.src = 'img/miladudi.png'
-const sapao = new Image()                           //#8
-sapao.src = 'img/sapao2.png' 
+const polvoEspinho = new Image();                  //#5
+polvoEspinho.src = 'img/polvoespinho.png';
+const olhosDaNoite = new Image();                  //#6
+olhosDaNoite.src = 'img/olhosdanoite.png';
+const miladudi = new Image();                      //#7
+miladudi.src = 'img/miladudi.png';
+const sapao = new Image();                         //#8
+sapao.src = 'img/sapao2.png'; 
+const bee = new Image();                           //#9            
+bee.src = 'img/bee.png';
+const bee2 = new Image();                          //#10
+bee2.src = 'img/bee2.png';
+const bee3 = new Image();                          //#11
+bee3.src = 'img/bee3.png';
+const bocaTorta = new Image();                     //#12
+bocaTorta.src = 'img/bocatorta.png';
+const monstroAzul = new Image();                   //#13
+monstroAzul.src = 'img/monstroazul.png';
 
-const gameOverDrawing = new Image()
-gameOverDrawing.src = 'img/gameover.png'
+const gameOverDrawing = new Image();
+gameOverDrawing.src = 'img/gameover.png';
 
 //audio 
-const enemyExplosionAudio = new Audio()
-enemyExplosionAudio.src = 'audio/explosion3.wav'
-enemyExplosionAudio.volume = 0.5
-const playerExplosionAudio = new Audio()
-playerExplosionAudio.src = 'audio/playerexplosion.wav'
-playerExplosionAudio.volume = 0.5
+const enemyExplosionAudio = new Audio();
+enemyExplosionAudio.src = 'audio/explosion3.wav';
+enemyExplosionAudio.volume = 0.5;
+const playerExplosionAudio = new Audio();
+playerExplosionAudio.src = 'audio/playerexplosion.wav';
+playerExplosionAudio.volume = 0.5;
+const hitAudio = new Audio();
+hitAudio.src = 'audio/hit.wav';
+hitAudio.volume = 0.5;
 
 enemySprites = [monstrito, coronga, bocaPreta, fantasmaNoturno, polvoEspinho,
-   olhosDaNoite, miladudi, sapao]
+   olhosDaNoite, miladudi, sapao, bee, bee2, bee3, bocaTorta, monstroAzul]
 enemiesArray = []
 
 class Enemy {
-   constructor(sourceImage, movementType, x, y) {
-      this.x = x  // normal value = 0
-      this.y = y // normal value = -150 
-      this.width = 150
-      this.height = 150
-      this.dx = 6
-      this.dy = 4
-      //this.dy = (Math.random() * 0.15) + 1
-      this.isOutofScreen = false
-      this.sourceImage = sourceImage
-      this.movementType = movementType
-      this.distX = 0
-      this.distY = 0
-      this.angle = 0                      // ever increasing
-      this.angleSpeed = Math.random() * 5 // frequência = velocidade
-      //this.curve = Math.random() * 5    // amplitude da senoide
-      this.curve = 2
-      this.firstMovementStart = false
-      this.firstMovementFinished = false
-      this.secondMovementStart = false
-      this.thirdMovementStart = false
-      this.setupMovement = false
-      this.hp = 1
+   constructor( config ) {
+      this.width = config.width || 150;
+      this.height = config.height || 150;
+      this.x = config.x || (Math.random() * (canvas.width - this.width));  
+      this.y = config.y || -150;
+      this.dx = config.dx || 0.35 * step; 
+      this.dy = config.dy || 0.35 * step;
+      this.isOutofScreen = false;
+      this.sourceImage = config.sourceImage || randomSelectEnemy();
+      this.movementType = config.movementType || randomSelectMovement();
+      this.distX = config.distX || 0;  
+      this.distY = config.distY || 0;
+      this.angle = config.angle || 0; // ever increasing
+      this.angleSpeed = config.angleSpeed || Math.random() * 2; // frequência = velocidade
+      this.curve = config.curve || 1; //this.curve = Math.random() * 5  // amplitude da senoide
+      this.firstMovementStart = false;
+      this.firstMovementFinished = false;
+      this.secondMovementStart = false;
+      this.thirdMovementStart = false;
+      this.setupMovement = false;
+      this.hp = config.hp || 1;
+      this.shootTimer = 0;
+      this.shootInterval = config.shootTimer || 2000; // miliseconds
+      this.boss = config.boss || false;
    }
 
-   update() {
-
-      // testar um por um com createEnemy()
-      
-      // #1 - STRAIGHT DOWN
-      if (this.movementType == "straightDown") {
-          this.y += this.dy
+   shootProjectile() {
+      this.shootTimer += step
+      if (this.shootTimer > this.shootInterval) {
+         this.shootTimer = 0
+         enemyProjectiles.push(new EnemyProjectile(
+            this.x + this.width/2,
+            this.y + this.height
+         ))
       }
-         
-      // #2 - MOVIMENTO RETO PARA BAIXO FROM RANDOM X
+   }
+
+   update() { 
+
       if (this.movementType == "straightDownRandomX") {
-         if (this.setupMovement == false) {
-            // enters setup
-            this.y = -150
-            this.x = (Math.random() * (canvas.width - this.width))
-            this.setupMovement = true
-         }
-         //movement
          this.y += this.dy
       }
 
-      // #3 - MOVIMENTO SENOIDE PARA BAIXO
       if (this.movementType == "senoidDown") {
          if (this.setupMovement == false) {
             // enters setup
-            //this.y = -150
-            this.angleSpeed = (Math.random() * 5)
-            this.curve = ((Math.random() * 175) + 75)
+            this.angleSpeed = (Math.random() * 2) + 3
+            this.curve = ((Math.random() * 150) + 100)
             this.setupMovement = true
          }
          //movement
@@ -94,20 +102,17 @@ class Enemy {
          this.y += this.dy * gameSpeed   
       }
 
-      // #4 - MOVIMENTO SENDOIDE PARA DIREITA, BUZZ POR 2 SEGUNDOS E DIVE
       if (this.movementType == "senoidRightAndDive") {
          // Primeiro movimento
          if (this.x < canvas.width * 0.75 && !this.secondMovementStart && !this.thirdMovementStart) { 
-            console.log('1st Movement Triggered')
             this.firstMovementStart = true
-            this.y += 1 * Math.sin(this.angle * Math.PI / 180)
-            this.angle += 1
-            this.x += this.dx + 1
+            this.y += 1 * Math.sin(this.angle * Math.PI / 270)
+            this.angle += 10
+            this.x += this.dx 
          } 
          if (this.x >= canvas.width * 0.75) {this.firstMovementFinished = true}
          // Second Movement
          if (this.firstMovementFinished && !this.secondMovementFinished) {
-            console.log('2ndMovement Triggered')
             this.secondMovementStart = true
             this.x += Math.random() * 4 - 2 
             this.y += Math.random() * 4 - 2 
@@ -121,28 +126,23 @@ class Enemy {
          }
          // Third Movement, dive
          if (this.thirdMovementStart) {
-            console.log('Third movement triggered')
-            this.x += this.distX/80
-            this.y += this.distY/80
+            this.x += this.distX/50
+            this.y += this.distY/50
    
          }
       }
 
-       
-      // #5 - SENOID BORDER RIGHT, BUZZ AND DIVE
       if (this.movementType == "senoidBorderRightAndDive") {
          // Primeiro movimento
          if (this.x > canvas.width * 0.75 && !this.secondMovementStart && !this.thirdMovementStart) { 
-            console.log('1st Movement Triggered')
             this.firstMovementStart = true
             this.y += 1 * Math.sin(this.angle * Math.PI / 180)
-            this.angle += 1
+            this.angle += 10
             this.x += -this.dx
          } 
          if (this.x <= canvas.width * 0.75) {this.firstMovementFinished = true}
          // Second Movement
          if (this.firstMovementFinished && !this.secondMovementFinished) {
-            console.log('2ndMovement Triggered')
             this.secondMovementStart = true
             this.x += Math.random() * 4 - 2 
             this.y += Math.random() * 4 - 2 
@@ -156,18 +156,16 @@ class Enemy {
          }
          // Third Movement, dive
          if (this.thirdMovementStart) {
-            console.log('Third movement triggered')
-            this.x += this.distX/90
-            this.y += this.distY/90
+            this.x += this.distX/50
+            this.y += this.distY/50
    
          }
       }
 
-      // #6 - SENOID BORDER LEFT, BUZZ AND DIVE
+      // Enemy spawn at border left, buzz and dive
       if (this.movementType == "senoidBorderLeftAndDive") {
          // Primeiro movimento
          if (this.x < canvas.width * 0.15 && !this.secondMovementStart && !this.thirdMovementStart) { 
-            console.log('1st Movement Triggered')
             this.firstMovementStart = true
             this.y += 1 * Math.sin(this.angle * Math.PI / 180)
             this.angle += 1
@@ -176,7 +174,6 @@ class Enemy {
          if (this.x >= canvas.width * 0.15) {this.firstMovementFinished = true}
          // Second Movement
          if (this.firstMovementFinished && !this.secondMovementFinished) {
-            console.log('2ndMovement Triggered')
             this.secondMovementStart = true
             this.x += Math.random() * 4 - 2 
             this.y += Math.random() * 4 - 2 
@@ -190,87 +187,86 @@ class Enemy {
          }
          // Third Movement, dive
          if (this.thirdMovementStart) {
-            console.log('Third movement triggered')
-            this.x += this.distX/90
-            this.y += this.distY/90
+            this.x += this.distX/50
+            this.y += this.distY/50
    
          }
       }
 
-      if (this.y > canvas.height) this.isOutofScreen = true
-      if (this.x > canvas.width + 15) this.isOutofScreen = true
+      //#7 Boss Movement - Bounce Left and Right
+      if (this.movementType == "bossMovement") {
+         // movement setup
+         if (this.setupMovement == false) {
+            //this.x = 500;
+            this.y = -150;
+            this.dy = 3;
+            this.dx = 3;
+            this.setupMovement = true;
+         }
+         // first movement - goes down 100 px
+         if (this.y < 40 && !this.secondMovementStart && !this.thirdMovementStart) { 
+            this.firstMovementStart = true;
+            this.y += this.dy;
+         } 
+         if (this.y >= 40) {this.firstMovementFinished = true}
+         // Second Movement Bounce
+         if (this.firstMovementFinished && !this.secondMovementFinished) {
+            this.secondMovementStart = true;
+            this.x += this.dx;
+            if (this.x + this.width > canvas.width) this.dx = -this.dx;
+            else if(this.x < 0) this.dx = -this.dx;
+         }
+      }
+
+      if (this.y > canvas.height) this.isOutofScreen = true;
+      if (this.x > canvas.width + 15) this.isOutofScreen = true;
+
    }
 
    draw() {
-      ctx.drawImage(this.sourceImage, this.x, this.y, this.width, this.height)
+      ctx.drawImage(this.sourceImage, this.x, this.y, this.width, this.height);
 
    }
 }
-
-// push new enemy to array
-// function createEnemy() {
-//    let randomSelectedEnemy = enemySprites[Math.floor(Math.random() * enemySprites.length)]
-//    let enemy = new Enemy(randomSelectedEnemy, "straightDownRamdonX", 500, -150);
-//    enemiesArray.push(enemy)
-//    console.log(enemy)
-//    console.log("New enemy created!")
-// }
-
-// function createEnemy() {
-//    let randomSelectedEnemy = enemySprites[Math.floor(Math.random() * enemySprites.length)]
-//    movements = ["straightDownNoSetup", "straightDown", "senoidDown", "senoidRightAndDive"]
-//    let randomSelectedMovement = movements[Math.floor(Math.random() * movements.length)]
-//    let enemy = new Enemy(randomSelectedEnemy, randomSelectedMovement)
-//    enemiesArray.push(enemy)
-//    console.log(enemy)
-//    //console.log("New enemy created!")
-// }
-
-
-// function spawnEnemy() { // 
-//    if (frame % 100 === 0) {
-//       createEnemy()
-//    }
-// }
-
-
-function collision(first, second) {
-   return !(first.x > second.x + second.width ||   
-      first.x + first.width < second.x ||   
-      first.y > second.y + second.height ||  
-      first.y + first.height < second.y)    
-}  
 
 function checkIfProjectileHitMonster() {
    for (i in projectilesArray) {
       for (j in enemiesArray) {
          if (collision(projectilesArray[i], enemiesArray[j])) {
-            //console.log("PROJECTILE HITS ENqEMY!")
-            const explosionX = enemiesArray[j].x + enemiesArray[j].width / 2
-            const explosionY = enemiesArray[j].y + enemiesArray[j].height / 2
-            enemiesArray.splice(j, 1)
-            j--
-            projectilesArray.splice(i, 1)
-            i--
-            score += 100; // scores 100 points per hit
-            scoreElement.innerHTML = score;   // writes score
-            enemyExplosionAudio.play()
-            //Enemy explosion
-            for (i = 0; i < 35; i++) {
-               particlesArray.push(new Particle(
-                  explosionX,                 // x
-                  explosionY,                 // y
-                  (Math.random() - 0.5) * 4,  // dx
-                  (Math.random() - 0.5) * 4,  // dy
-                  Math.random() * 4,          //radius
-                  'yellow'                    //color
-               ))
+            // se colisão
+            enemiesArray[j].hp--;
+            const explosionX = enemiesArray[j].x + enemiesArray[j].width / 2;
+            const explosionY = enemiesArray[j].y + enemiesArray[j].height / 2;
+            projectilesArray.splice(i, 1);
+            i--;
+            
+            if(enemiesArray[j].hp > 0) {
+               hitAudio.play();
             }
-            return // PUTA QUE PARIU!!!
-                  // itera projéteis
-                  // 1 projétil compara com todos os monstros
-                  // se colisão, splice os 2
-                  // mas continuava rodando o for sem o projétil para comparar, 
+            else if(enemiesArray[j].hp == 0){
+               if (enemiesArray[j].boss == true) {
+                  accumulator = 0
+                  newSequence = true;
+               }
+               enemiesArray.splice(j, 1);
+               j--;
+               
+               score += 100; // scores 100 points per hit
+               scoreElement.innerHTML = score;   // writes score
+               enemyExplosionAudio.play();
+               // particles on enemy explosion
+               for (i = 0; i < 30; i++) {
+                  particlesArray.push(new Particle(
+                     explosionX,                 // x
+                     explosionY,                 // y
+                     (Math.random() * 4) -2,  // dx
+                     (Math.random() * 4) -2,  // dy
+                     Math.random() * 4,          //radius
+                     'yellow'                    //color
+                  ))
+               }
+            }
+            return; 
          }
       }
    }
@@ -282,44 +278,65 @@ function destroyEnemiesOutOfScreen() {
       if (enemy.isOutofScreen) {
          enemiesArray.splice(i, 1)
          i--
-         //console.log('ENEMY REMOVED!')
       }
    }
 }
 
 function handleEnemies() {
+   
    spawnEnemy()
+
    for (i in enemiesArray) {
       enemiesArray[i].update()
-      enemiesArray[i].draw()
-
-      //collision check: monster x player (game over!)
+      enemiesArray[i].shootProjectile()
+      //check collision player x enemy 
       if (collision(player, enemiesArray[i])) {
-         console.log("Collision PLAYER X ENEMY!")
-         const explosionX = player.x + player.width / 2
-         const explosionY = player.y + player.height / 2
+         player.hp--
+         // enemy explosion
+         const explosionX = enemiesArray[i].x + enemiesArray[i].width / 2
+         const explosionY = enemiesArray[i].y + enemiesArray[i].height / 2
          enemiesArray.splice(i, 1);
-         //Player explosion particles
-         for (i = 0; i < 50; i++) {
+         for (i = 0; i < 30; i++) {
             particlesArray.push(new Particle(
                explosionX,                 // x
                explosionY,                 // y
-               (Math.random() - 0.5) * 2,  // dx
-               (Math.random() - 0.5) * 2,  // dy
-               Math.random() * 7,          //radius
-               'white'                     //color
+               (Math.random() * 4) -2,  // dx
+               (Math.random() * 4) -2,  // dy
+               Math.random() * 4,          //radius
+               'yellow'                    //color
             ))
          }
-
-         //hide player, cancel player commands and wait 2 seconds to pause animation
-         player.opacity = 0
-         playerExplosionAudio.play()
-         game.over = true
-         setTimeout(() => { game.active = false }, 2000)
+         if (player.hp > 0) {enemyExplosionAudio.play()}
+         // i--
+         if(player.hp == 0){
+            // particles
+            const explosionX = player.x + player.width / 2
+            const explosionY = player.y + player.height / 2
+            for (i = 0; i < 50; i++) {
+               particlesArray.push(new Particle(
+                  explosionX,                 // x
+                  explosionY,                 // y
+                  (Math.random() - 0.5) * 2,  // dx
+                  (Math.random() - 0.5) * 2,  // dy
+                  Math.random() * 7,          //radius
+                  'white'                     //color
+               ))
+            }
+            //hide player, cancel player commands and wait 2 seconds to pause animation
+            player.opacity = 0
+            playerExplosionAudio.play()
+            game.over = true
+            setTimeout(() => { game.active = false }, 2000)
+         }
       }
    }
    checkIfProjectileHitMonster() // also generates explosion particles
    destroyEnemiesOutOfScreen()
-   createEnemyProjectile()  // FIXME
+   
 }
 
+function drawEnemies(){
+   for (i in enemiesArray) {
+      enemiesArray[i].draw();
+   }
+}

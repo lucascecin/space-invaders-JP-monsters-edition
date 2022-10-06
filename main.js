@@ -1,86 +1,46 @@
-// To do´s
-// enemy shoots (at random intervals)
+// V5
+// to do´s
+// deterministic fixed time step (DONE)
+// FIX ME: update enemies with fixed step (DONE)
+// FIX ME: update particles with fixed step
+// enemy shoots (at random intervals) (DONE)
+// enemy shoot collision (DONE)
 // change enemy movement: like original space invaders and others
 // enemies spawns in grids
-// maniputale delta time and fps
 // pause game
-// enemy HP
-// boss 1
+// enemy HP (DONE)
+// player HP (DONE)
+// Player HP display
+// boss 1 (DONE)
 // Stage 2
-
+// smaller hitboxes 
 
 //setup and loop file
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');
 let scoreElement = document.querySelector('#scoreElement');
-let score = 0
-
-canvas.width = 1024
-canvas.height = 576
-
-var frame = 0;
+let score = 0;
+canvas.width = 1024;
+canvas.height = 576;
 var gameSpeed = 1;
-var quitGame = false
+var quitGame = false;
 
 //game speed
-function handleGameStatus() {
-    if (frame % 2000 === 0) { // 2000 / 60 = every 33 seconds
-    gameSpeed += 0.05
-    console.log('Game Speed set to ' + gameSpeed)
+let gameStatusTimer = 0
+function handleGameStatus(deltaTime) {
+    if (gameStatusTimer > 30000) { // a cada 30 segundos
+    gameSpeed += 0.05;
+    console.log('Game Speed set to ' + gameSpeed);
+    gameStatusTimer = 0;
+    } else {
+        gameStatusTimer += deltaTime;
     }
 }
 
 let game = {
     over: false,
     active: true,
-}
-
-// keys
-const LEFT = 37, RIGHT = 39, SPACE = 32, Q = 81;
-let spaceIsPressed = false;
-
-window.addEventListener("keydown",keydownHandler,false);
-window.addEventListener("keyup",keyupHandler,false);
-
-function keydownHandler(e) {
-    //console.log(e)
-    //if (game.over) return
-    switch(e.keyCode){
-        case RIGHT:
-            player.mvRight = true;
-            player.mvLeft = false;
-            break;
-        case LEFT:
-            player.mvRight = false;
-            player.mvLeft = true;
-            break; 
-        case SPACE:
-            spaceIsPressed = true;
-            player.firing = true
-            if (!game.over) {player.shoot()}
-            player.canFireAgain = false; // após 1 disparo, não pode disparar mais
-            if (game.over && !game.active) {restartGame()}
-            break;
-        case Q:
-            quitGame = true;
-            break;
-    }
-}
-
-function keyupHandler(e) {
-    switch(e.keyCode){
-        case RIGHT:
-            player.mvRight = false;
-            break;
-        case LEFT:
-            player.mvLeft = false;
-            break;
-        case SPACE:
-            spaceIsPressed = false;
-            player.firing = false;
-            player.canFireAgain = true;
-            break;
-    }
+    paused: false
 }
 
 function drawGameOverMessage() {
@@ -95,7 +55,7 @@ function drawPressSpaceBarMessage() {
 
 function restartGame() {
     if (!game.active && game.over && spaceIsPressed) {
-        console.log('Restart Game Triggered!')
+        console.log('Restart Game Triggered!');
         game.active = true;
         game.over = false;
         enemiesArray = [];
@@ -103,52 +63,79 @@ function restartGame() {
         player.opacity = 1;
         player.x = canvas.width/2 - 25;
         player.y = 500;
-        score = 0
-        scoreElement.innerHTML = score
-        frame = 0
-        gameSpeed = 1
-        animate()
+        score = 0;
+        scoreElement.innerHTML = score;
+        frameTimer = 0;
+        lastTime = 0;
+        gameSpeed = 1;
+        accumulator = 0;
+        player.hp = 3;
+        animate();
     }
 }
 
-function drawTempoDeJogo() {
-    // assuming broser runs at 60 fps
-    let tempoDeJogo = document.getElementById('tempoDeJogo')
-    tempoDeJogo.innerHTML = 'Tempo de jogo: ' + Math.floor(frame/60) + ' segundos'
-}
-function drawFpsDisplay() {
-    let fpsDisplay = document.getElementById('fpsDisplay')
-    fpsDisplay.innerHTML = Math.floor(frame/(timeAcumInMiliseconds/1000)) + ' fps'
+let tempoDoJogo = 0;
+function drawTempoDeJogo(deltaTime) {
+    let tempoDeJogo = document.getElementById('tempoDeJogo');
+    tempoDoJogo += deltaTime;
+    tempoDeJogo.innerHTML = Math.floor(tempoDoJogo/1000) + ' segundos';
 }
 
-let lastTime = 1
-let timeAcumInMiliseconds = 0
+//inicializa as variáveis
+let lastTime = 0; // variável para calcular o deltaTime
+let deltaTime = 0; // tempo em milisegundos do último frame > expectativa para o próximo
+let frameTimer = 0; // acumula o deltaTime > tempo decorrido de verdade em milisegundos
+const step = ((1/60)*1000); // static time step
 
-
+//tweaking game loop to deterministic time step
 function animate(timeStamp) {
     if (!game.active) {
-        drawPressSpaceBarMessage()
-        return
+        drawPressSpaceBarMessage();
+        return;
     }
-    frame++
-    const deltaTime = timeStamp - lastTime
-    lastTime = timeStamp
-    timeAcumInMiliseconds += deltaTime
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    handleStars()
-    handlePlayer()
-    handleProjectiles()
-    handleEnemies()
-    handleParticles()
-    handleGameStatus()
-    drawTempoDeJogo()
-    drawFpsDisplay()
-    //handleLayer2()
-    if (game.over) {drawGameOverMessage()}
-    //if (game.over) {setTimeout(drawGameOverMessage, 200)} // timeout not working
-    if (quitGame) {return} //if "Q" is pressed
+    let deltaTime = timeStamp - lastTime; // calcula o deltaTime do frame ~16.6
+    frameTimer += deltaTime; // frameTimer é o accumulator de tempo, decrescido pelo step
+    let updated = false; // no início de cada loop, updated é falso
+    let whileCounter = 0;
+    while (frameTimer > step) {
+        // update and collision checks
+        updateStars();
+        player.update();
+        updatePlayerProjectiles();
+        handleEnemies();
+        handleEnemyProjectiles();
+        handleGameStatus();
+        updateParticles();
+        // safeguard to endless while loop        
+        whileCounter++;
+        frameTimer -= step;
+        if(whileCounter > 3) {
+            console.log('while counter > 5 !!!');
+            frameTimer = 0
+            break;
+        }
+        // only draw if updated at least once
+        updated = true;
+    }
+
+    if (updated) {  
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        drawStars();
+        player.draw();
+        drawPlayerProjectiles();
+        drawEnemies();
+        drawEnemyProjectiles();
+        drawParticles();
+        drawTempoDeJogo(deltaTime);
+    }
+
+    lastTime = timeStamp; // last time recebe o timeStamp atual
+    
+    if (game.over) {drawGameOverMessage()};
+    //if (game.over) {setTimeout(drawGameOverMessage, 200)}; // timeout not working
+    if (quitGame) {return}; //if "Q" is pressed
     if (game.active) requestAnimationFrame(animate);
 }
 animate(0);

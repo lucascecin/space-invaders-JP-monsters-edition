@@ -11,8 +11,8 @@ class Player {
         this.y = y;
         this.width = 75;
         this.height = 75;
-        this.dx = 0;
-        this.dy = 0;
+        this.dx = 0.5;
+        this.dy = 0.5;
         this.dead = false;
         this.hp = 100;
         this.mvRight = false;
@@ -20,16 +20,17 @@ class Player {
         this.firing = false;
         this.canFireAgain = true; // to avoid turbo fire
         this.opacity = 1;
+        this.hp = 5 // starting HP
     }
     update(){
         if (this.mvRight) {
-            this.x += 8;
+            this.x += this.dx * step;
             if (this.x + this.width > canvas.width) {
                 this.x = canvas.width - this.width
             }
         }
         if (this.mvLeft) {
-            this.x -= 8;
+            this.x -= this.dx * step;
             if (this.x < 0) {
                 this.x = 0
             }
@@ -54,9 +55,3 @@ class Player {
 
 //let player = new Player (canvas.width/2 - 25, 500)
 let player = new Player (490, 500)
-
-function handlePlayer() {
-    player.update();
-    player.draw();
-}
-
